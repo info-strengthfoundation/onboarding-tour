@@ -1,0 +1,232 @@
+/* ==========================================================================
+   Onboarding Tour — Styles
+   ========================================================================== */
+
+/* ---------- Custom Properties ---------- */
+:root {
+  --tour-overlay-bg: rgba(0, 0, 0, 0.55);
+  --tour-spotlight-border-radius: 6px;
+  --tour-spotlight-padding: 8px;
+  --tour-tooltip-bg: #fff;
+  --tour-tooltip-color: #1e293b;
+  --tour-tooltip-border-radius: 10px;
+  --tour-tooltip-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  --tour-tooltip-max-width: 380px;
+  --tour-tooltip-min-width: 260px;
+  --tour-tooltip-padding: 22px 24px 18px;
+  --tour-tooltip-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --tour-btn-primary-bg: #2563eb;
+  --tour-btn-primary-color: #fff;
+  --tour-btn-secondary-bg: transparent;
+  --tour-btn-secondary-color: #64748b;
+  --tour-z-overlay: 999990;
+  --tour-z-spotlight: 999995;
+  --tour-z-tooltip: 999999;
+  --tour-transition-speed: 0.25s;
+}
+
+/* ---------- Overlay ---------- */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--tour-z-overlay);
+  background: var(--tour-overlay-bg);
+  opacity: 0;
+  transition: opacity var(--tour-transition-speed) ease;
+  pointer-events: auto;
+}
+
+.tour-overlay--visible {
+  opacity: 1;
+}
+
+/* ---------- Spotlight ---------- */
+.tour-spotlight {
+  position: fixed;
+  z-index: var(--tour-z-spotlight);
+  border-radius: var(--tour-spotlight-border-radius);
+  box-shadow: 0 0 0 9999px var(--tour-overlay-bg);
+  transition: top var(--tour-transition-speed) ease,
+    left var(--tour-transition-speed) ease,
+    width var(--tour-transition-speed) ease,
+    height var(--tour-transition-speed) ease;
+  pointer-events: none;
+}
+
+/* ---------- Tooltip ---------- */
+.tour-tooltip {
+  position: fixed;
+  z-index: var(--tour-z-tooltip);
+  background: var(--tour-tooltip-bg);
+  color: var(--tour-tooltip-color);
+  border-radius: var(--tour-tooltip-border-radius);
+  box-shadow: var(--tour-tooltip-shadow);
+  max-width: var(--tour-tooltip-max-width);
+  min-width: var(--tour-tooltip-min-width);
+  padding: var(--tour-tooltip-padding);
+  font-family: var(--tour-tooltip-font);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--tour-transition-speed) ease,
+    transform var(--tour-transition-speed) ease,
+    top var(--tour-transition-speed) ease,
+    left var(--tour-transition-speed) ease;
+  pointer-events: auto;
+}
+
+.tour-tooltip--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Arrow (CSS triangle) */
+.tour-tooltip__arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--tour-tooltip-bg);
+  transform: rotate(45deg);
+}
+
+.tour-tooltip--bottom .tour-tooltip__arrow {
+  top: -6px;
+  left: calc(50% - 6px);
+}
+
+.tour-tooltip--top .tour-tooltip__arrow {
+  bottom: -6px;
+  left: calc(50% - 6px);
+}
+
+.tour-tooltip--left .tour-tooltip__arrow {
+  right: -6px;
+  top: calc(50% - 6px);
+}
+
+.tour-tooltip--right .tour-tooltip__arrow {
+  left: -6px;
+  top: calc(50% - 6px);
+}
+
+/* ---------- Tooltip Content ---------- */
+.tour-tooltip__title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tour-tooltip__text {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #475569;
+}
+
+/* ---------- Tooltip Footer / Buttons ---------- */
+.tour-tooltip__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tour-tooltip__progress {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.tour-tooltip__actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Shared button reset */
+.tour-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background var(--tour-transition-speed) ease,
+    color var(--tour-transition-speed) ease;
+  line-height: 1.4;
+}
+
+.tour-btn:focus-visible {
+  outline: 2px solid var(--tour-btn-primary-bg);
+  outline-offset: 2px;
+}
+
+/* Primary button */
+.tour-btn--primary {
+  background: var(--tour-btn-primary-bg);
+  color: var(--tour-btn-primary-color);
+}
+
+.tour-btn--primary:hover {
+  background: #1d4ed8;
+}
+
+/* Secondary / Skip button */
+.tour-btn--secondary {
+  background: var(--tour-btn-secondary-bg);
+  color: var(--tour-btn-secondary-color);
+}
+
+.tour-btn--secondary:hover {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+/* ---------- Modal-only step (no spotlight) ---------- */
+.tour-tooltip--center {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+.tour-tooltip--center.tour-tooltip--visible {
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  .tour-tooltip {
+    max-width: calc(100vw - 32px);
+    min-width: 0;
+    padding: 18px 16px 14px;
+  }
+
+  .tour-tooltip__title {
+    font-size: 15px;
+  }
+
+  .tour-tooltip__text {
+    font-size: 13px;
+  }
+
+  .tour-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .tour-tooltip__footer {
+    flex-wrap: wrap;
+  }
+
+  .tour-tooltip__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
