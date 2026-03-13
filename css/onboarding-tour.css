@@ -48,7 +48,7 @@ body.tour-active [style*="position:sticky"] {
   position: fixed;
   inset: 0;
   z-index: var(--tour-z-overlay);
-  background: var(--tour-overlay-bg);
+  background: transparent;
   opacity: 0;
   transition: opacity var(--tour-transition-speed) ease;
   pointer-events: auto;
