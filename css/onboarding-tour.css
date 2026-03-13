@@ -7,28 +7,31 @@
 :root {
   --tour-gold: #C9A227;
   --tour-gold-hover: #b08d1e;
+  --tour-gold-soft: rgba(201, 162, 39, 0.12);
   --tour-dark: #1C1C1C;
+  --tour-text: #444;
+  --tour-text-light: #777;
   --tour-white: #FFFFFF;
-  --tour-overlay-bg: rgba(0, 0, 0, 0.7);
-  --tour-spotlight-border-radius: 8px;
-  --tour-spotlight-padding: 8px;
+  --tour-overlay-bg: rgba(0, 0, 0, 0.65);
+  --tour-spotlight-border-radius: 12px;
+  --tour-spotlight-padding: 10px;
   --tour-tooltip-bg: #FFFFFF;
-  --tour-tooltip-border-radius: 8px;
-  --tour-tooltip-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --tour-tooltip-max-width: 380px;
-  --tour-tooltip-min-width: 260px;
-  --tour-tooltip-padding: 24px;
+  --tour-tooltip-border-radius: 16px;
+  --tour-tooltip-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  --tour-tooltip-max-width: 400px;
+  --tour-tooltip-min-width: 280px;
+  --tour-tooltip-padding: 28px;
   --tour-tooltip-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif;
   --tour-z-overlay: 9998;
   --tour-z-spotlight: 9999;
   --tour-z-tooltip: 10000;
-  --tour-transition-speed: 0.3s;
+  --tour-transition-speed: 0.35s;
 }
 
 /* ---------- Softr stacking-context overrides ---------- */
-/* Softr uses sticky headers with z-index 800+ which create stacking contexts
-   that sit above our overlay. Reset them while the tour is active. */
 body.tour-active [style*="z-index"],
 body.tour-active .softr-topbar,
 body.tour-active .softr-sidebar {
@@ -46,6 +49,8 @@ body.tour-active [style*="position:sticky"] {
   inset: 0;
   z-index: var(--tour-z-overlay);
   background: var(--tour-overlay-bg);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   opacity: 0;
   transition: opacity var(--tour-transition-speed) ease;
   pointer-events: auto;
@@ -59,14 +64,27 @@ body.tour-active [style*="position:sticky"] {
 .tour-spotlight {
   position: fixed;
   z-index: var(--tour-z-spotlight);
-  border: 4px solid var(--tour-gold);
+  border: 3px solid var(--tour-gold);
   border-radius: var(--tour-spotlight-border-radius);
-  box-shadow: 0 0 0 9999px var(--tour-overlay-bg);
-  transition: top var(--tour-transition-speed) ease,
-    left var(--tour-transition-speed) ease,
-    width var(--tour-transition-speed) ease,
-    height var(--tour-transition-speed) ease;
+  box-shadow:
+    0 0 0 9999px var(--tour-overlay-bg),
+    0 0 24px 4px rgba(201, 162, 39, 0.25);
+  transition:
+    top var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    left var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    width var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    height var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+}
+
+/* Subtle gold pulse on the spotlight */
+@keyframes tour-spotlight-pulse {
+  0%, 100% { box-shadow: 0 0 0 9999px var(--tour-overlay-bg), 0 0 24px 4px rgba(201, 162, 39, 0.25); }
+  50%      { box-shadow: 0 0 0 9999px var(--tour-overlay-bg), 0 0 32px 8px rgba(201, 162, 39, 0.35); }
+}
+
+.tour-spotlight {
+  animation: tour-spotlight-pulse 2.5s ease-in-out infinite;
 }
 
 /* ---------- Tooltip ---------- */
@@ -82,78 +100,112 @@ body.tour-active [style*="position:sticky"] {
   padding: var(--tour-tooltip-padding);
   font-family: var(--tour-tooltip-font);
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity var(--tour-transition-speed) ease,
-    transform var(--tour-transition-speed) ease,
-    top var(--tour-transition-speed) ease,
-    left var(--tour-transition-speed) ease;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    transform var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    top var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1),
+    left var(--tour-transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: auto;
+  border-top: 3px solid var(--tour-gold);
 }
 
 .tour-tooltip--visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
-/* Arrow (CSS triangle) */
+/* Arrow */
 .tour-tooltip__arrow {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: var(--tour-tooltip-bg);
   transform: rotate(45deg);
+  border: none;
 }
 
 .tour-tooltip--bottom .tour-tooltip__arrow {
-  top: -6px;
-  left: calc(50% - 6px);
+  top: -7px;
+  left: calc(50% - 7px);
+  border-top: 3px solid var(--tour-gold);
+  border-left: 3px solid var(--tour-gold);
 }
 
 .tour-tooltip--top .tour-tooltip__arrow {
-  bottom: -6px;
-  left: calc(50% - 6px);
+  bottom: -7px;
+  left: calc(50% - 7px);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .tour-tooltip--left .tour-tooltip__arrow {
-  right: -6px;
-  top: calc(50% - 6px);
+  right: -7px;
+  top: calc(50% - 7px);
+  box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.06);
 }
 
 .tour-tooltip--right .tour-tooltip__arrow {
-  left: -6px;
-  top: calc(50% - 6px);
+  left: -7px;
+  top: calc(50% - 7px);
+  border-top: 3px solid var(--tour-gold);
+  border-left: 3px solid var(--tour-gold);
 }
 
 /* ---------- Tooltip Content ---------- */
 .tour-tooltip__title {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 18px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--tour-dark);
+  letter-spacing: -0.01em;
 }
 
 .tour-tooltip__text {
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   font-size: 14px;
-  line-height: 1.6;
-  color: #333;
+  line-height: 1.7;
+  color: var(--tour-text);
 }
 
 .tour-tooltip__text ul {
-  margin: 8px 0 0;
-  padding-left: 18px;
+  margin: 10px 0 0;
+  padding-left: 0;
+  list-style: none;
 }
 
 .tour-tooltip__text ul li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.6;
 }
 
-/* ---------- Step Counter ---------- */
+.tour-tooltip__text ul li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tour-gold-soft);
+  border: 2px solid var(--tour-gold);
+}
+
+.tour-tooltip__text ul li strong {
+  color: var(--tour-dark);
+  font-weight: 600;
+}
+
+/* ---------- Step Counter / Progress ---------- */
 .tour-tooltip__progress {
   font-size: 12px;
-  color: #666;
+  font-weight: 500;
+  color: var(--tour-text-light);
   white-space: nowrap;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 /* ---------- Tooltip Footer / Buttons ---------- */
@@ -161,7 +213,11 @@ body.tour-active [style*="position:sticky"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 0;
+  padding-top: 16px;
 }
 
 .tour-tooltip__actions {
@@ -175,17 +231,30 @@ body.tour-active [style*="position:sticky"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
+  padding: 10px 22px;
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background var(--tour-transition-speed) ease,
+  transition:
+    background var(--tour-transition-speed) ease,
     color var(--tour-transition-speed) ease,
-    border-color var(--tour-transition-speed) ease;
+    border-color var(--tour-transition-speed) ease,
+    box-shadow var(--tour-transition-speed) ease,
+    transform 0.15s ease;
   line-height: 1.4;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.tour-btn:hover {
+  transform: translateY(-1px);
+}
+
+.tour-btn:active {
+  transform: translateY(0);
 }
 
 .tour-btn:focus-visible {
@@ -197,46 +266,101 @@ body.tour-active [style*="position:sticky"] {
 .tour-btn--primary {
   background: var(--tour-gold);
   color: var(--tour-white);
+  box-shadow: 0 2px 8px rgba(201, 162, 39, 0.3);
 }
 
 .tour-btn--primary:hover {
   background: var(--tour-gold-hover);
+  box-shadow: 0 4px 14px rgba(201, 162, 39, 0.4);
 }
 
 /* Secondary / Skip button */
 .tour-btn--secondary {
   background: transparent;
-  color: #666;
-  border: 1px solid #ccc;
+  color: var(--tour-text-light);
+  border: 1px solid #ddd;
 }
 
 .tour-btn--secondary:hover {
-  color: #333;
-  background: #f5f5f5;
-  border-color: #999;
+  color: var(--tour-dark);
+  background: #f7f7f7;
+  border-color: #bbb;
 }
 
 /* Link-style button (for "Політики та стратегії") */
 .tour-btn--link {
   background: transparent;
   color: var(--tour-gold);
-  border: 1px solid var(--tour-gold);
+  border: 2px solid var(--tour-gold);
 }
 
 .tour-btn--link:hover {
   background: var(--tour-gold);
   color: var(--tour-white);
+  box-shadow: 0 2px 10px rgba(201, 162, 39, 0.35);
 }
 
 /* ---------- Modal-only step (no spotlight, centered) ---------- */
 .tour-tooltip--center {
   top: 50% !important;
   left: 50% !important;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(0.95);
+  border-top: none;
+  border-radius: var(--tour-tooltip-border-radius);
+  max-width: 440px;
+  padding: 36px 32px;
+  text-align: center;
 }
 
 .tour-tooltip--center.tour-tooltip--visible {
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tour-tooltip--center .tour-tooltip__title {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.tour-tooltip--center .tour-tooltip__text {
+  font-size: 15px;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tour-tooltip--center .tour-tooltip__footer {
+  justify-content: center;
+  border-top: none;
+  padding-top: 8px;
+}
+
+.tour-tooltip--center .tour-tooltip__actions {
+  margin-left: 0;
+}
+
+/* Gold accent line at top of centered modals */
+.tour-tooltip--center::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  border-radius: 0 0 4px 4px;
+  background: var(--tour-gold);
+}
+
+/* ---------- Entrance animation ---------- */
+@keyframes tour-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------- Responsive ---------- */
@@ -244,11 +368,21 @@ body.tour-active [style*="position:sticky"] {
   .tour-tooltip {
     max-width: calc(100vw - 32px);
     min-width: 0;
-    padding: 18px 16px 14px;
+    padding: 22px 18px 16px;
+    border-radius: 12px;
+  }
+
+  .tour-tooltip--center {
+    padding: 28px 22px;
+    max-width: calc(100vw - 40px);
   }
 
   .tour-tooltip__title {
     font-size: 16px;
+  }
+
+  .tour-tooltip--center .tour-tooltip__title {
+    font-size: 18px;
   }
 
   .tour-tooltip__text {
@@ -256,7 +390,7 @@ body.tour-active [style*="position:sticky"] {
   }
 
   .tour-btn {
-    padding: 10px 18px;
+    padding: 9px 18px;
     font-size: 13px;
   }
 }
