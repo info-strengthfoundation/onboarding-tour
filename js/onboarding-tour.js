@@ -468,13 +468,7 @@
     var params = new URLSearchParams(window.location.search);
     if (params.get('from') !== 'welcome') return false;
 
-    // Condition 2: Tour not already completed
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === 'true') return false;
-    } catch (e) {
-      // localStorage unavailable — allow start
-    }
-
+    // Always start when ?from=welcome is present
     return true;
   }
 
