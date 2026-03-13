@@ -54,7 +54,7 @@
       title: '4/6 Ваше фото',
       text: 'Будь ласка, завантажте Ваше фото. Це допоможе колегам швидше ідентифікувати Вас у команді.',
       selector: '.avatar-container',
-      position: 'left',
+      position: 'bottom',
       button: 'Далі'
     },
     // Step 5/6: Головне меню
@@ -208,21 +208,37 @@
     }
 
     // Scroll target into view if needed
-    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-    requestAnimationFrame(function () {
+    // Wait for scroll to settle before measuring positions
+    setTimeout(function () {
       var rect = target.getBoundingClientRect();
       var pad = 8;
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
 
-      // Position spotlight
+      // Clamp spotlight to visible viewport
+      var spotTop = Math.max(0, rect.top - pad);
+      var spotLeft = Math.max(0, rect.left - pad);
+      var spotBottom = Math.min(vh, rect.bottom + pad);
+      var spotRight = Math.min(vw, rect.right + pad);
+
+      // Position spotlight (viewport-clamped)
       els.spotlight.style.display = '';
-      els.spotlight.style.top = (rect.top - pad) + 'px';
-      els.spotlight.style.left = (rect.left - pad) + 'px';
-      els.spotlight.style.width = (rect.width + pad * 2) + 'px';
-      els.spotlight.style.height = (rect.height + pad * 2) + 'px';
+      els.spotlight.style.top = spotTop + 'px';
+      els.spotlight.style.left = spotLeft + 'px';
+      els.spotlight.style.width = (spotRight - spotLeft) + 'px';
+      els.spotlight.style.height = (spotBottom - spotTop) + 'px';
+
+      // Use clamped rect for tooltip positioning
+      var clampedRect = {
+        top: spotTop, left: spotLeft,
+        bottom: spotBottom, right: spotRight,
+        width: spotRight - spotLeft, height: spotBottom - spotTop
+      };
 
       // Determine placement (use step.position hint or auto-detect)
-      var placement = step.position || computePlacement(rect);
+      var placement = step.position || computePlacement(clampedRect);
       if (placement === 'center') {
         els.spotlight.style.display = 'none';
         els.tooltip.className = 'tour-tooltip tour-tooltip--center';
@@ -237,7 +253,7 @@
       els.arrow.style.display = '';
 
       var tooltipRect = els.tooltip.getBoundingClientRect();
-      var pos = calcTooltipPosition(placement, rect, tooltipRect, GAP);
+      var pos = calcTooltipPosition(placement, clampedRect, tooltipRect, GAP);
 
       els.tooltip.style.top = pos.top + 'px';
       els.tooltip.style.left = pos.left + 'px';
@@ -245,7 +261,7 @@
       requestAnimationFrame(function () {
         els.tooltip.classList.add('tour-tooltip--visible');
       });
-    });
+    }, 400);
   }
 
   function computePlacement(targetRect) {
