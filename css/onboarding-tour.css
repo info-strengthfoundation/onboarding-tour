@@ -26,6 +26,20 @@
   --tour-transition-speed: 0.3s;
 }
 
+/* ---------- Softr stacking-context overrides ---------- */
+/* Softr uses sticky headers with z-index 800+ which create stacking contexts
+   that sit above our overlay. Reset them while the tour is active. */
+body.tour-active [style*="z-index"],
+body.tour-active .softr-topbar,
+body.tour-active .softr-sidebar {
+  z-index: auto !important;
+}
+
+body.tour-active [style*="position: sticky"],
+body.tour-active [style*="position:sticky"] {
+  position: relative !important;
+}
+
 /* ---------- Overlay ---------- */
 .tour-overlay {
   position: fixed;
