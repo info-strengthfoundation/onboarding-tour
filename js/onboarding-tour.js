@@ -1,23 +1,130 @@
 /* ==========================================================================
    Onboarding Tour — JavaScript Module
+   Softr.io Portal — StrengthFoundation
+   Vanilla JS, no dependencies
    ========================================================================== */
 (function () {
   'use strict';
 
-  /* ---------- Step Configuration (populate later) ---------- */
+  /* ---------- Configuration ---------- */
+  var STORAGE_KEY = 'softr-tour-completed';
+  var POLICIES_URL = '/strategies-and-policies';
+
+  /* ---------- Step Definitions ---------- */
   var steps = [
-    // { selector: 'CSS_SELECTOR', title: 'STEP_TITLE', text: 'STEP_DESCRIPTION' }
+    // Step 0: Welcome Introduction (centered modal, no spotlight)
+    {
+      type: 'welcome',
+      title: 'Ласкаво просимо!',
+      text: 'Зараз ми переглянемо до блискавок ознайомитесь з ресурсом. У якому Ви знайдетесь — порталом фонду. Це наш спільний робочий простір: тут відбір важливі документи, правила взаємодії, структура роботи та матеріали, які допоможуть швидко зорієнтуватися і компетентно включитися в процеси.',
+      selector: null,
+      position: 'center',
+      button: 'Почати огляд'
+    },
+    // Step 1/7: Версія панелі
+    {
+      step: '1/7',
+      title: '1/7 Версія панелі',
+      text: 'Швидкий доступ до скарг, пропозицій та переміщення між основними функціями.',
+      selector: '[data-block-type="header"], .header-block, nav.navbar, header',
+      position: 'bottom',
+      button: 'Далі'
+    },
+    // Step 2/7: Ваші картки
+    {
+      step: '2/7',
+      title: '2/7 Ваші картки',
+      text: 'Тут можеш змінити мову категорію або ввійти в систему.',
+      selector: '[data-block-type="cards"], .cards-block, .user-cards',
+      position: 'right',
+      button: 'Далі'
+    },
+    // Step 3/7: Ваш особистий профіль
+    {
+      step: '3/7',
+      title: '3/7 Ваш особистий профіль',
+      text: 'Тут зібрана вся основна інформація про Вас як колмотора фонду.',
+      selector: '[data-block-type="details"], .details-block, .profile-details',
+      position: 'right',
+      button: 'Далі'
+    },
+    // Step 4/7: Налаштування особистого профілю
+    {
+      step: '4/7',
+      title: '4/7 Налаштування особистого профілю',
+      text: 'Будь ласка, перевірте свою особисті інформацію в профілі та додайте дані, яких не вистачає. Якщо якась інформація змінилась — також оновіть її. Це важливо для коректної співпраці.',
+      selector: '[data-block-type="form"], .form-block, .profile-form, form',
+      position: 'right',
+      button: 'Далі'
+    },
+    // Step 5/7: Ваше фото
+    {
+      step: '5/7',
+      title: '5/7 Ваше фото',
+      text: 'Будь ласка, завантажте Ваше фото. Це допоможе колегам швидше ідентифікувати Вас у команді.',
+      selector: '.avatar, .profile-image, [data-block-type="image"], .image-upload, .photo-upload',
+      position: 'right',
+      button: 'Далі'
+    },
+    // Step 6/7: Головне меню
+    {
+      step: '6/7',
+      title: '6/7 Головне меню',
+      html: true,
+      text: 'Зліва на порталі розташовані основні розділи:<ul>' +
+        '<li><strong>Портал фонду</strong> — головна сторінка порталу, де відображається важлива інформація та оновлення.</li>' +
+        '<li><strong>Завдання</strong> — тут ви можете переглянути свої особисті завдання, а також задачі, які поставлені для вашого відділу.</li>' +
+        '<li><strong>Структура фонду</strong> — у цьому розділі можна ознайомитися з організаційною структурою: відділами, керівництвом команди роботи та потоків ініціатив.</li>' +
+        '<li><strong>Політики та стратегії</strong> — обов\'язковий розділ для ознайомлення. Після перегляду необхідно підтвердити ознайомлення, натиснувши відповідну кнопку.</li>' +
+        '<li><strong>НА2</strong> — розділ з матеріалами що найбільш поширені інформацією, де корисно зважити ознайомлення з інформацією.</li>' +
+        '</ul>',
+      selector: '[data-block-type="menu"], .sidebar, nav.sidebar, .side-menu, .left-menu',
+      position: 'right',
+      button: 'Далі'
+    },
+    // Step 7/7: Вивчили питання?
+    {
+      step: '7/7',
+      title: '7/7 Вивчили питання?',
+      text: 'Будь ласка, перевірте свою особисті інформацію в профілі та додайте дані, яких не вистачає. Якщо якась інформація змінилась — також оновіть її.',
+      selector: '.main-content, [data-block-type="content"], main, .content-area',
+      position: 'center',
+      button: 'Далі'
+    },
+    // Final Step: Огляд завершено!
+    {
+      type: 'final',
+      title: 'Огляд завершено!',
+      html: true,
+      text: 'Тепер Ви готові до роботи в порталом.<br><br>' +
+        'Будь ласка, переконайте до обов\'язкового розділу «Політики та стратегії» для ознайомлення з внутрішніми правилами фонду. ' +
+        'Після ознайомлення необхідно підтвердити ознайомлення, натиснувши відповідну кнопку.',
+      selector: null,
+      position: 'center',
+      button: 'Готово'
+    }
   ];
 
   /* ---------- State ---------- */
   var currentStep = -1;
-  var els = {}; // cached DOM references
+  var els = {};
   var active = false;
 
   /* ---------- Helpers ---------- */
 
-  function qs(selector) {
-    return document.querySelector(selector);
+  /** Try multiple comma-separated selectors and return the first match */
+  function queryFirst(selectorString) {
+    if (!selectorString) return null;
+    var selectors = selectorString.split(',');
+    for (var i = 0; i < selectors.length; i++) {
+      try {
+        var el = document.querySelector(selectors[i].trim());
+        if (el) return el;
+      } catch (e) {
+        // Invalid selector — skip
+      }
+    }
+    return null;
   }
 
   function createElement(tag, className) {
@@ -45,24 +152,24 @@
 
     els.arrow = createElement('div', 'tour-tooltip__arrow');
     els.title = createElement('h2', 'tour-tooltip__title');
-    els.text = createElement('p', 'tour-tooltip__text');
+    els.text = createElement('div', 'tour-tooltip__text');
 
     var footer = createElement('div', 'tour-tooltip__footer');
     els.progress = createElement('span', 'tour-tooltip__progress');
 
-    var actions = createElement('div', 'tour-tooltip__actions');
+    els.actions = createElement('div', 'tour-tooltip__actions');
     els.skipBtn = createElement('button', 'tour-btn tour-btn--secondary');
-    els.skipBtn.textContent = 'Skip';
+    els.skipBtn.textContent = 'Пропустити';
     els.skipBtn.setAttribute('type', 'button');
-    els.skipBtn.setAttribute('aria-label', 'Skip tour');
+    els.skipBtn.setAttribute('aria-label', 'Пропустити тур');
 
     els.nextBtn = createElement('button', 'tour-btn tour-btn--primary');
     els.nextBtn.setAttribute('type', 'button');
 
-    actions.appendChild(els.skipBtn);
-    actions.appendChild(els.nextBtn);
+    els.actions.appendChild(els.skipBtn);
+    els.actions.appendChild(els.nextBtn);
     footer.appendChild(els.progress);
-    footer.appendChild(actions);
+    footer.appendChild(els.actions);
 
     els.tooltip.appendChild(els.arrow);
     els.tooltip.appendChild(els.title);
@@ -75,8 +182,8 @@
 
     // Event listeners
     els.nextBtn.addEventListener('click', next);
-    els.skipBtn.addEventListener('click', finish);
-    els.overlay.addEventListener('click', finish);
+    els.skipBtn.addEventListener('click', skip);
+    els.overlay.addEventListener('click', skip);
     document.addEventListener('keydown', onKeyDown);
   }
 
@@ -85,7 +192,7 @@
   function positionTooltip(step) {
     var GAP = 12;
 
-    // Modal-only step (no selector)
+    // Centered modal (no spotlight)
     if (!step.selector) {
       els.spotlight.style.display = 'none';
       els.tooltip.className = 'tour-tooltip tour-tooltip--center';
@@ -96,9 +203,10 @@
       return;
     }
 
-    var target = qs(step.selector);
+    var target = queryFirst(step.selector);
     if (!target) {
-      // Target not found — fall back to centered modal
+      console.warn('[Tour] Target element not found for step: ' + (step.title || ''), 'Selectors:', step.selector);
+      // Fallback to centered modal
       els.spotlight.style.display = 'none';
       els.tooltip.className = 'tour-tooltip tour-tooltip--center';
       els.arrow.style.display = 'none';
@@ -111,10 +219,9 @@
     // Scroll target into view if needed
     target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Wait a tick for scroll to settle, then measure
     requestAnimationFrame(function () {
       var rect = target.getBoundingClientRect();
-      var pad = 8; // spotlight padding around element
+      var pad = 8;
 
       // Position spotlight
       els.spotlight.style.display = '';
@@ -123,8 +230,18 @@
       els.spotlight.style.width = (rect.width + pad * 2) + 'px';
       els.spotlight.style.height = (rect.height + pad * 2) + 'px';
 
-      // Determine best placement
-      var placement = computePlacement(rect);
+      // Determine placement (use step.position hint or auto-detect)
+      var placement = step.position || computePlacement(rect);
+      if (placement === 'center') {
+        els.spotlight.style.display = 'none';
+        els.tooltip.className = 'tour-tooltip tour-tooltip--center';
+        els.arrow.style.display = 'none';
+        requestAnimationFrame(function () {
+          els.tooltip.classList.add('tour-tooltip--visible');
+        });
+        return;
+      }
+
       els.tooltip.className = 'tour-tooltip tour-tooltip--' + placement;
       els.arrow.style.display = '';
 
@@ -148,12 +265,11 @@
     var spaceRight = vw - targetRect.right;
     var spaceLeft = targetRect.left;
 
-    // Prefer below, then above, then right, then left
     if (spaceBelow >= 180) return 'bottom';
     if (spaceAbove >= 180) return 'top';
     if (spaceRight >= 320) return 'right';
     if (spaceLeft >= 320) return 'left';
-    return 'bottom'; // default
+    return 'bottom';
   }
 
   function calcTooltipPosition(placement, targetRect, tooltipRect, gap) {
@@ -180,11 +296,11 @@
         break;
     }
 
-    // Clamp horizontal position within viewport
+    // Clamp horizontal
     if (left < 8) left = 8;
     if (left + tooltipRect.width > vw - 8) left = vw - tooltipRect.width - 8;
 
-    // Clamp vertical position
+    // Clamp vertical
     if (top < 8) top = 8;
 
     return { top: top, left: left };
@@ -197,20 +313,69 @@
 
     currentStep = index;
     var step = steps[currentStep];
+    var isWelcome = step.type === 'welcome';
+    var isFinal = step.type === 'final';
 
-    // Reset visibility for transition
+    // Reset visibility
     els.tooltip.classList.remove('tour-tooltip--visible');
 
     // Update content
     els.title.textContent = step.title || '';
-    els.text.textContent = step.text || '';
 
-    var isLast = currentStep === steps.length - 1;
-    els.nextBtn.textContent = isLast ? 'Finish' : 'Next';
-    els.nextBtn.setAttribute('aria-label', isLast ? 'Finish tour' : 'Next step');
-    els.progress.textContent = (currentStep + 1) + ' of ' + steps.length;
+    if (step.html) {
+      els.text.innerHTML = step.text || '';
+    } else {
+      els.text.textContent = step.text || '';
+    }
+
+    // Configure buttons and progress based on step type
+    if (isWelcome) {
+      // Welcome: only "Почати огляд" button, no skip, no progress
+      els.skipBtn.style.display = 'none';
+      els.progress.textContent = '';
+      els.nextBtn.textContent = step.button;
+      els.nextBtn.setAttribute('aria-label', 'Почати огляд');
+      // Remove policies button if present
+      removePoliciesButton();
+    } else if (isFinal) {
+      // Final: "Політики та стратегії" + "Готово" buttons, no skip, no progress
+      els.skipBtn.style.display = 'none';
+      els.progress.textContent = '';
+      els.nextBtn.textContent = step.button;
+      els.nextBtn.setAttribute('aria-label', 'Завершити тур');
+      // Add policies button
+      addPoliciesButton();
+    } else {
+      // Regular step: "Далі" + "Пропустити" buttons + progress
+      els.skipBtn.style.display = '';
+      els.nextBtn.textContent = step.button || 'Далі';
+      els.nextBtn.setAttribute('aria-label', 'Наступний крок');
+      els.progress.textContent = step.step || '';
+      removePoliciesButton();
+    }
 
     positionTooltip(step);
+  }
+
+  function addPoliciesButton() {
+    if (els.policiesBtn) return;
+    els.policiesBtn = createElement('button', 'tour-btn tour-btn--link');
+    els.policiesBtn.textContent = 'Політики та стратегії';
+    els.policiesBtn.setAttribute('type', 'button');
+    els.policiesBtn.setAttribute('aria-label', 'Перейти до політик та стратегій');
+    els.policiesBtn.addEventListener('click', function () {
+      markCompleted();
+      window.location.href = POLICIES_URL;
+    });
+    // Insert before the next/finish button
+    els.actions.insertBefore(els.policiesBtn, els.nextBtn);
+  }
+
+  function removePoliciesButton() {
+    if (els.policiesBtn && els.policiesBtn.parentNode) {
+      els.policiesBtn.parentNode.removeChild(els.policiesBtn);
+      els.policiesBtn = null;
+    }
   }
 
   /* ---------- Navigation ---------- */
@@ -220,16 +385,42 @@
       finish();
       return;
     }
-    showStep(currentStep + 1);
+
+    var nextIndex = currentStep + 1;
+    var nextStep = steps[nextIndex];
+
+    // Skip steps whose target element is not found (except modal steps)
+    if (nextStep.selector && !queryFirst(nextStep.selector)) {
+      console.warn('[Tour] Skipping step (element not found): ' + (nextStep.title || ''));
+      currentStep = nextIndex;
+      next();
+      return;
+    }
+
+    showStep(nextIndex);
+  }
+
+  function skip() {
+    markCompleted();
+    teardown();
   }
 
   function finish() {
+    markCompleted();
     teardown();
+  }
+
+  function markCompleted() {
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch (e) {
+      // localStorage unavailable
+    }
   }
 
   function onKeyDown(e) {
     if (!active) return;
-    if (e.key === 'Escape') finish();
+    if (e.key === 'Escape') skip();
     if (e.key === 'ArrowRight' || e.key === 'Enter') next();
   }
 
@@ -242,7 +433,6 @@
     active = true;
     buildUI();
 
-    // Show overlay first, then first step
     requestAnimationFrame(function () {
       els.overlay.classList.add('tour-overlay--visible');
       showStep(0);
@@ -254,24 +444,32 @@
     currentStep = -1;
     document.removeEventListener('keydown', onKeyDown);
 
-    // Fade out
     if (els.overlay) els.overlay.classList.remove('tour-overlay--visible');
     if (els.tooltip) els.tooltip.classList.remove('tour-tooltip--visible');
 
-    // Remove DOM after transition
     setTimeout(function () {
       if (els.overlay && els.overlay.parentNode) els.overlay.parentNode.removeChild(els.overlay);
       if (els.spotlight && els.spotlight.parentNode) els.spotlight.parentNode.removeChild(els.spotlight);
       if (els.tooltip && els.tooltip.parentNode) els.tooltip.parentNode.removeChild(els.tooltip);
       els = {};
-    }, 300);
+    }, 350);
   }
 
-  /* ---------- URL Parameter Detection ---------- */
+  /* ---------- Auto-start Conditions ---------- */
 
   function shouldAutoStart() {
+    // Condition 1: URL has ?from=welcome
     var params = new URLSearchParams(window.location.search);
-    return params.get('from') === 'welcome';
+    if (params.get('from') !== 'welcome') return false;
+
+    // Condition 2: Tour not already completed
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === 'true') return false;
+    } catch (e) {
+      // localStorage unavailable — allow start
+    }
+
+    return true;
   }
 
   /* ---------- Public API ---------- */
@@ -280,6 +478,10 @@
     start: start,
     next: next,
     finish: finish,
+    skip: skip,
+    reset: function () {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* noop */ }
+    },
     setSteps: function (newSteps) {
       if (Array.isArray(newSteps)) steps = newSteps;
     },
